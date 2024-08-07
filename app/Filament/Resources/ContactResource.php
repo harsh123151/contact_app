@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Components\CustomMultiSelect;
+use App\Filament\Components\GroupMultiSelect;
 use App\Filament\Exports\ContactExporter;
 use App\Filament\Imports\ContactImporter;
 use App\Filament\Resources\ContactResource\Pages;
@@ -10,6 +12,7 @@ use App\Models\Contact;
 use Filament\Actions\CreateAction;
 // use Filament\Actions\ExportAction;
 use Filament\Forms;
+use Filament\Forms\Components\Livewire;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -21,6 +24,9 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\MultiSelect;
+use App\Livewire\Dropdown;
+use App\Models\Group;
+use Filament\Forms\Components\Select;
 
 class ContactResource extends Resource
 {
@@ -43,9 +49,18 @@ class ContactResource extends Resource
             TextInput::make('contact_no')
                 ->required()
                 ->tel(), 
-            MultiSelect::make('groups')
+                Select::make('groups')
+                ->multiple()
                 ->relationship('groups', 'name')
-                ->required()->searchable()->preload(),
+                ->preload()
+                ->optionsLimit(5)
+                ->createOptionForm([
+                    TextInput::make('name')
+                        ->required(),
+                ])
+                ->createOptionUsing(function (array $data) {
+                    return Group::create($data)->id;
+                }),
         ]);
     }
 
