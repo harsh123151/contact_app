@@ -56,10 +56,15 @@ class ContactResource extends Resource
                 ->optionsLimit(5)
                 ->createOptionForm([
                     TextInput::make('name')
-                        ->required(),
+                        ->required()
+                        ->regex('/^[a-zA-Z\s]+$/'),
                 ])
                 ->createOptionUsing(function (array $data) {
-                    return Group::create($data)->id;
+                    $validatedData = validator($data, [
+                            'name' => ['required', 'regex:/^[a-zA-Z\s]+$/'],
+                        ])->validate();
+                    $group = Group::firstOrCreate(['name' => $validatedData['name']]);
+                    return $group->id;
                 }),
         ]);
     }
